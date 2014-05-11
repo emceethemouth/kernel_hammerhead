@@ -405,8 +405,8 @@ void enable_irq_callback(void *info)
 
 void disable_irq_callback(void *info)
 {
-	int irq = *(unsigned int *)info;
-	disable_percpu_irq(irq);
+	/* int irq = *(unsigned int *)info;
+	disable_percpu_irq(irq); */
 }
 
 int
