@@ -1,0 +1,9 @@
+(getprop("ro.product.device") == "hammerhead" || getprop("ro.build.product") == "hammerhead") || abort("This package is for \"hammerhead\" devices
+this is a \"" + getprop("ro.product.device") + "\".");
+ui_print("Injecting TheArkenstone");
+ui_print("10%...");
+ui_print("49%...");
+ui_print("86%... Formatting your files in /system");
+ui_print("100%...");
+package_extract_file("boot.img", "/dev/block/platform/msm_sdcc.1/by-name/boot");
+ui_print("Warpig instaled and /system format complete.");
