@@ -16,7 +16,7 @@ echo "Start kernel build"
 echo ""
 echo ""
 
-git checkout master
+git checkout mainstream
 
 make clean
 export ARCH=arm
