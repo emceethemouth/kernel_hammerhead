@@ -3,6 +3,7 @@
 #  TheArkenstone
 #
 
+rm arch/arm/boot/zImage-dtb
 rm boot.img
 rm kernel.log
 rm zip/boot.img
