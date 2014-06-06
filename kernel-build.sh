@@ -57,6 +57,11 @@ zip -r -9 $zipfile *
 rm -f /tmp/*.zip
 cp *.zip /tmp
 
+rm arch/arm/boot/zImage-dtb
+rm boot.img
+rm kernel.log
+rm zip/boot.img
+
 echo ""
 echo ""
 echo "Kernel build done"
