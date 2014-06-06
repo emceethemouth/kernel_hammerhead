@@ -7,7 +7,7 @@ rm arch/arm/boot/zImage-dtb
 rm boot.img
 rm kernel.log
 rm zip/boot.img
-rm zip/TheArkenstone-HH.img
+rm zip/TheArkenstone-HH.zip
 
 clear
 
