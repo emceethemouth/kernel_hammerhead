@@ -547,59 +547,6 @@ void msm_mpm_exit_sleep(bool from_idle)
 		}
 	}
 }
-static void msm_mpm_sys_low_power_modes(bool allow)
-{
-	static DEFINE_MUTEX(enable_xo_mutex);
-
-	mutex_lock(&enable_xo_mutex);
-	if (allow) {
-		if (xo_enabled) {
-			clk_disable_unprepare(xo_clk);
-			xo_enabled = false;
-		}
-	} else {
-		if (!xo_enabled) {
-			/* If we cannot enable XO clock then we want to flag it,
-			 * than having to deal with not being able to wakeup
-			 * from a non-monitorable interrupt
-			 */
-			BUG_ON(clk_prepare_enable(xo_clk));
-			xo_enabled = true;
-		}
-	}
-	mutex_unlock(&enable_xo_mutex);
-}
-
-void msm_mpm_suspend_prepare(void)
-{
-	bool allow = msm_mpm_irqs_detectable(false) &&
-		msm_mpm_gpio_irqs_detectable(false);
-	msm_mpm_sys_low_power_modes(allow);
-}
-EXPORT_SYMBOL(msm_mpm_suspend_prepare);
-
-void msm_mpm_suspend_wake(void)
-{
-	bool allow = msm_mpm_irqs_detectable(true) &&
-		msm_mpm_gpio_irqs_detectable(true);
-	msm_mpm_sys_low_power_modes(allow);
-}
-EXPORT_SYMBOL(msm_mpm_suspend_wake);
-
-static void msm_mpm_work_fn(struct work_struct *work)
-{
-	unsigned long flags;
-	while (1) {
-		bool allow;
-		while (wait_for_completion_interruptible(
-			&wake_wq) != 0);
-		spin_lock_irqsave(&msm_mpm_lock, flags);
-		allow = msm_mpm_irqs_detectable(true) &&
-				msm_mpm_gpio_irqs_detectable(true);
-		spin_unlock_irqrestore(&msm_mpm_lock, flags);
-		msm_mpm_sys_low_power_modes(allow);
-	}
-}
 
 static int __devinit msm_mpm_dev_probe(struct platform_device *pdev)
 {
