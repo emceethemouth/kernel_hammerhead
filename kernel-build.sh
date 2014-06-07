@@ -57,6 +57,7 @@ zip -r -9 $zipfile *
 rm -f /tmp/*.zip
 cp *.zip /tmp
 
+cd ..
 rm arch/arm/boot/zImage-dtb
 rm boot.img
 rm kernel.log
