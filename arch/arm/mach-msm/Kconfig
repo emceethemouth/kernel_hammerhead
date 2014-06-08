@@ -1215,6 +1215,12 @@ config MSM_DEBUG_UART_PHYS
 	default 0xA9C00000 if (ARCH_MSM7X27 || ARCH_QSD8X50) && DEBUG_MSM_UART3
 	default 0xACC00000 if ARCH_MSM7X30 && DEBUG_MSM_UART3
 
+config USERSPACE_VOLTAGE_CONTROL
+        bool "Enable Userspace CPU Voltage Control"
+        default y
+        help
+          Userspace Voltage Control
+
 choice
 	prompt "Debug UART"
 	depends on DEBUG_LL
