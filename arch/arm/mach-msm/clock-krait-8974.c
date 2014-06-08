@@ -21,7 +21,6 @@
 #include <linux/regulator/consumer.h>
 #include <linux/of.h>
 #include <linux/cpumask.h>
-#include <linux/cpufreq.h>
 
 #include <asm/cputype.h>
 
@@ -586,6 +585,7 @@ static void krait_update_uv(int *uv, int num, int boost_uv)
 	}
 }
 
+<<<<<<< HEAD
 #ifdef CONFIG_MSM_CPU_VOLTAGE_CONTROL
 #define CPU_VDD_MAX	1200
 #define CPU_VDD_MIN	675
@@ -654,6 +654,8 @@ ssize_t store_UV_mV_table(struct cpufreq_policy *policy,
 }
 #endif
 
+=======
+>>>>>>> parent of 3e2434a... msm: clock-krait-8974: User voltage control for msm-cpufreq device
 static int clock_krait_8974_driver_probe(struct platform_device *pdev)
 {
 	struct device *dev = &pdev->dev;
