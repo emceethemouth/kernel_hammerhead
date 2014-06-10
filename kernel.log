@@ -1,4 +1,0 @@
-  CHK     include/linux/version.h
-  CHK     include/generated/utsrelease.h
-  HOSTCC  scripts/dtc/checks.o
-  HOSTCC  scripts/dtc/data.o
