@@ -21,7 +21,7 @@ git checkout mainstream
 
 make clean
 export ARCH=arm
-export CROSS_COMPILE=~/tmp/arm-cortex_a15-linux-gnueabihf-linaro-4.9.1/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=~/tmp/arm-eabi-4.10/bin/arm-eabi-
 export ENABLE_GRAPHITE=true
 make hammerhead_defconfig
 time make -j4 2>&1 | tee kernel.log
