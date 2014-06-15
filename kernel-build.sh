@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-#  Stuxnet
+#  TheArkenstone
 #
 
 rm arch/arm/boot/zImage-dtb
 rm boot.img
 rm kernel.log
 rm zip/boot.img
-rm zip/Stuxnet-HH.zip
+rm zip/TheArkenstone-HH.zip
 
 clear
 
@@ -44,7 +44,7 @@ rm -rf zImage
 
 cd ../hammerhead/
 
-zipfile="Stuxnet-HH.zip"
+zipfile="TheArkenstone-HH.zip"
 echo ""
 echo "zipping kernel"
 cp boot.img zip/
