@@ -365,7 +365,8 @@ MODFLAGS        = -DMODULE \
                   -mfpu=neon-vfpv4 \
                   -mtune=cortex-a15 \
                   -Ofast \
-                  -fgcse-las
+                  -fgcse-las \
+		  -fpredictive-commoning
 
 CFLAGS_MODULE   = $(MODFLAGS)
 AFLAGS_MODULE   = $(MODFLAGS)
@@ -379,7 +380,15 @@ CFLAGS_KERNEL   = -mfpu=neon-vfpv4 \
 ifeq ($(ENABLE_GRAPHITE),true)
 CFLAGS_KERNEL	+= -fgraphite -floop-flatten -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
 endif
-AFLAGS_KERNEL	=
+AFLAGS_KERNEL	= -mfpu=neon-vfpv4 \
+                  -mtune=cortex-a15 \
+                  -O2 \
+                  -fgcse-las \
+                  -fpredictive-commoning \
+		  -Wno-error=implicit-function-declaration
+ifeq ($(ENABLE_GRAPHITE),true)
+AFLAGS_KERNEL	+= -fgraphite -floop-flatten -floop-parallelize-all -ftree-loop-linear -floop-interchange -floop-strip-mine -floop-block
+endif
 CFLAGS_GCOV	= -fprofile-arcs -ftest-coverage
 
 
@@ -398,7 +407,8 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -Wno-format-security \
 		   -Wno-sizeof-pointer-memaccess \
 		   -mno-unaligned-access \
-		   -fno-delete-null-pointer-checks
+		   -fno-delete-null-pointer-checks \
+		   -pipe
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
 KBUILD_AFLAGS   := -D__ASSEMBLY__
