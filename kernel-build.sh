@@ -7,7 +7,7 @@ rm arch/arm/boot/zImage-dtb
 rm boot.img
 rm kernel.log
 rm zip/boot.img
-rm zip/TheArkenstone-HH.zip
+rm zip/TheArkenstone-HH-L.zip
 
 clear
 
@@ -17,7 +17,7 @@ echo "Start kernel build"
 echo ""
 echo ""
 
-git checkout mainstream
+git checkout android-L
 
 make clean
 make mrproper
@@ -29,9 +29,9 @@ time make -j4 2>&1 | tee kernel.log
 
 echo ""
 echo "Building boot.img"
-cp arch/arm/boot/zImage-dtb ../ramdisk_hammerhead/
+cp arch/arm/boot/zImage-dtb ../ramdisk_L/
 
-cd ../ramdisk_hammerhead/
+cd ../ramdisk_L/
 
 echo ""
 echo "building ramdisk"
@@ -45,12 +45,12 @@ rm -rf zImage
 
 cd ../hammerhead/
 
-zipfile="TheArkenstone-HH.zip"
+zipfile="TheArkenstone-HH-L.zip"
 echo ""
 echo "zipping kernel"
 cp boot.img zip/
 
-rm -rf ../ramdisk_hammerhead/boot.img
+rm -rf ../ramdisk_L/boot.img
 
 cd zip/
 rm -f *.zip
