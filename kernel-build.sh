@@ -38,12 +38,12 @@ echo "building ramdisk"
 ./mkbootfs ramdisk | gzip > ramdisk.gz
 echo ""
 echo "making boot image"
-./mkbootimg --base 0x00000000 --ramdisk_offset 0x02900000 --second_offset 0x00F00000 --tags_offset 0x02700000 --cmdline 'console=ttyHSL0 androidboot.hardware=hammerhead user_debug=31 maxcpus=2 msm_watchdog_v2.enable=1 earlyprintk' --kernel zImage-dtb --ramdisk ramdisk.gz --output ../hammerhead/boot.img
+./mkbootimg --base 0x00000000 --ramdisk_offset 0x02900000 --second_offset 0x00F00000 --tags_offset 0x02700000 --cmdline 'console=ttyHSL0 androidboot.hardware=hammerhead user_debug=31 maxcpus=2 msm_watchdog_v2.enable=1 earlyprintk' --kernel zImage-dtb --ramdisk ramdisk.gz --output ../hammerhead_L/boot.img
 
 rm -rf ramdisk.gz
 rm -rf zImage
 
-cd ../hammerhead/
+cd ../hammerhead_L/
 
 zipfile="TheArkenstone-HH-L.zip"
 echo ""
