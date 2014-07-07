@@ -22,7 +22,7 @@ git checkout android-L
 make clean
 make mrproper
 export ARCH=arm
-export CROSS_COMPILE=~/tmp/linaro-arm-eabi-4.9.1/bin/arm-cortex_a15-linux-gnueabihf-
+export CROSS_COMPILE=~/tmp/linaro-arm-eabi-4.9a/bin/arm-eabi-
 export ENABLE_GRAPHITE=true
 make hammerhead_defconfig
 time make -j4 2>&1 | tee kernel.log
