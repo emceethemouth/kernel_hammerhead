@@ -7,7 +7,7 @@ rm arch/arm/boot/zImage-dtb
 rm boot.img
 rm kernel.log
 rm zip/boot.img
-rm zip/TheArkenstone-HH-L.zip
+rm zip/TheArkenstone-L.zip
 
 clear
 
@@ -45,7 +45,7 @@ rm -rf zImage
 
 cd ../hammerhead_L/
 
-zipfile="TheArkenstone-HH-L.zip"
+zipfile="TheArkenstone-L.zip"
 echo ""
 echo "zipping kernel"
 cp boot.img zip/
