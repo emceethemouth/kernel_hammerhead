@@ -223,122 +223,6 @@ static const struct {
 		512, 0, 2, (SZ_1M + SZ_512K), NO_VER, NO_VER },
 };
 
-/* Nice level for the higher priority GPU start thread */
-static int _wake_nice = -7;
-
-/* Number of milliseconds to stay active active after a wake on touch */
-static unsigned int _wake_timeout = 100;
-
-/*
- * A workqueue callback responsible for actually turning on the GPU after a
- * touch event. kgsl_pwrctrl_wake() is used without any active_count protection
- * to avoid the need to maintain state.  Either somebody will start using the
- * GPU or the idle timer will fire and put the GPU back into slumber
- */
-static void adreno_input_work(struct work_struct *work)
-{
-	struct adreno_device *adreno_dev = container_of(work,
-			struct adreno_device, input_work);
-	struct kgsl_device *device = &adreno_dev->dev;
-
-	mutex_lock(&device->mutex);
-
-	device->flags |= KGSL_FLAG_WAKE_ON_TOUCH;
-
-	/*
-	 * Don't schedule adreno_start in a high priority workqueue, we are
-	 * already in a workqueue which should be sufficient
-	 */
-	kgsl_pwrctrl_wake(device, 0);
-
-	/*
-	 * When waking up from a touch event we want to stay active long enough
-	 * for the user to send a draw command.  The default idle timer timeout
-	 * is shorter than we want so go ahead and push the idle timer out
-	 * further for this special case
-	 */
-	mod_timer(&device->idle_timer,
-		jiffies + msecs_to_jiffies(_wake_timeout));
-	mutex_unlock(&device->mutex);
-}
-
-/*
- * Process input events and schedule work if needed.  At this point we are only
- * interested in groking EV_ABS touchscreen events
- */
-static void adreno_input_event(struct input_handle *handle, unsigned int type,
-		unsigned int code, int value)
-{
-	struct kgsl_device *device = handle->handler->private;
-	struct adreno_device *adreno_dev = ADRENO_DEVICE(device);
-
-	/*
-	 * Only queue the work under certain circumstances: we have to be in
-	 * slumber, the event has to be EV_EBS and we had to have processed an
-	 * IB since the last time we called wake on touch.
-	 */
-	if ((type == EV_ABS) &&
-		!(device->flags & KGSL_FLAG_WAKE_ON_TOUCH) &&
-		(device->state == KGSL_STATE_SLUMBER))
-		schedule_work(&adreno_dev->input_work);
-}
-
-static int adreno_input_connect(struct input_handler *handler,
-		struct input_dev *dev, const struct input_device_id *id)
-{
-	struct input_handle *handle;
-	int ret;
-
-	handle = kzalloc(sizeof(*handle), GFP_KERNEL);
-	if (handle == NULL)
-		return -ENOMEM;
-
-	handle->dev = dev;
-	handle->handler = handler;
-	handle->name = handler->name;
-
-	ret = input_register_handle(handle);
-	if (ret) {
-		kfree(handle);
-		return ret;
-	}
-
-	ret = input_open_device(handle);
-	if (ret) {
-		input_unregister_handle(handle);
-		kfree(handle);
-	}
-
-	return ret;
-}
-
-static void adreno_input_disconnect(struct input_handle *handle)
-{
-	input_close_device(handle);
-	input_unregister_handle(handle);
-	kfree(handle);
-}
-
-/*
- * We are only interested in EV_ABS events so only register handlers for those
- * input devices that have EV_ABS events
- */
-static const struct input_device_id adreno_input_ids[] = {
-	{
-		.flags = INPUT_DEVICE_ID_MATCH_EVBIT,
-		.evbit = { BIT_MASK(EV_ABS) },
-	},
-	{ },
-};
-
-static struct input_handler adreno_input_handler = {
-	.event = adreno_input_event,
-	.connect = adreno_input_connect,
-	.disconnect = adreno_input_disconnect,
-	.name = "kgsl",
-	.id_table = adreno_input_ids,
-};
-
 /**
  * adreno_perfcounter_init: Reserve kernel performance counters
  * @device: device to configure
@@ -1982,15 +1866,15 @@ int adreno_reset(struct kgsl_device *device)
  *
  * This is a common routine to write to FT sysfs files.
  */
-static int _ft_sysfs_store(const char *buf, size_t count, int *ptr)
+static int _ft_sysfs_store(const char *buf, size_t count, unsigned int *ptr)
 {
 	char temp[20];
-	long val;
+	unsigned long val;
 	int rc;
 
 	snprintf(temp, sizeof(temp), "%.*s",
 			 (int)min(count, sizeof(temp) - 1), buf);
-	rc = kstrtol(temp, 0, &val);
+	rc = kstrtoul(temp, 0, &val);
 	if (rc)
 		return rc;
 
@@ -2205,36 +2089,6 @@ static int _ft_long_ib_detect_show(struct device *dev,
 }
 
 
-/**
- * _wake_nice_store() - Store nice level for the higher priority GPU start
- * thread
- * @dev: device ptr
- * @attr: Device attribute
- * @buf: value to write
- * @count: size of the value to write
- *
- */
-static ssize_t _wake_nice_store(struct device *dev,
-				     struct device_attribute *attr,
-				     const char *buf, size_t count)
-{
-	return _ft_sysfs_store(buf, count, &_wake_nice);
-}
-
-/**
- * _wake_nice_show() -  Show nice level for the higher priority GPU start
- * thread
- * @dev: device ptr
- * @attr: Device attribute
- * @buf: value read
- */
-static ssize_t _wake_nice_show(struct device *dev,
-					struct device_attribute *attr,
-					char *buf)
-{
-	return snprintf(buf, PAGE_SIZE, "%d\n", _wake_nice);
-}
-
 #define FT_DEVICE_ATTR(name) \
 	DEVICE_ATTR(name, 0644,	_ ## name ## _show, _ ## name ## _store);
 
@@ -2243,16 +2097,12 @@ FT_DEVICE_ATTR(ft_pagefault_policy);
 FT_DEVICE_ATTR(ft_fast_hang_detect);
 FT_DEVICE_ATTR(ft_long_ib_detect);
 
-static FT_DEVICE_ATTR(wake_nice);
-static FT_DEVICE_ATTR(wake_timeout);
 
 const struct device_attribute *ft_attr_list[] = {
 	&dev_attr_ft_policy,
 	&dev_attr_ft_pagefault_policy,
 	&dev_attr_ft_fast_hang_detect,
 	&dev_attr_ft_long_ib_detect,
-	&dev_attr_wake_nice,
-	&dev_attr_wake_timeout,
 	NULL,
 };
 
